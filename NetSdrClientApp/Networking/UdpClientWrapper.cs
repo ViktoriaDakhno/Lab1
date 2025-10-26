@@ -23,40 +23,40 @@ namespace NetSdrClientApp.Networking
 
         public async Task StartListeningAsync()
         {
-        if (_cts != null)
-        {
-            throw new InvalidOperationException("Listener is already running.");
-        }
-    
-        _cts = new CancellationTokenSource();
-        Console.WriteLine("Start listening for UDP messages...");
-    
-        try
-        {
-            _udpClient = new UdpClient(_localEndPoint);
-            while (_cts.Token != null && !_cts.Token.IsCancellationRequested)
+            if (_cts != null)
+                throw new InvalidOperationException("Listener is already running.");
+        
+            _cts = new CancellationTokenSource();
+            Console.WriteLine("Start listening for UDP messages...");
+        
+            try
             {
-                UdpReceiveResult result = await _udpClient.ReceiveAsync(_cts.Token);
-                MessageReceived?.Invoke(this, result.Buffer);
-    
-                Console.WriteLine($"Received from {result.RemoteEndPoint}");
+                _udpClient = new UdpClient(_localEndPoint);
+        
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    UdpReceiveResult result = await _udpClient.ReceiveAsync(_cts.Token);
+                    MessageReceived?.Invoke(this, result.Buffer);
+        
+                    Console.WriteLine($"Received from {result.RemoteEndPoint}");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Listener was stopped
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error receiving message: {ex.Message}");
+            }
+            finally
+            {
+                Console.WriteLine("Listener stopped.");
+                _cts?.Dispose();
+                _cts = null;
             }
         }
-        catch (OperationCanceledException)
-        {
-            // Listener was stopped
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error receiving message: {ex.Message}");
-        }
-        finally
-        {
-            Console.WriteLine("Listener stopped.");
-            _cts?.Dispose();
-            _cts = null;
-        }
-    }
+
 
         public void StopListening()
         {
