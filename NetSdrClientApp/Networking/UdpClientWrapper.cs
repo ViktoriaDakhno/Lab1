@@ -23,29 +23,40 @@ namespace NetSdrClientApp.Networking
 
         public async Task StartListeningAsync()
         {
-            _cts = new CancellationTokenSource();
-            Console.WriteLine("Start listening for UDP messages...");
-
-            try
+        if (_cts != null)
+        {
+            throw new InvalidOperationException("Listener is already running.");
+        }
+    
+        _cts = new CancellationTokenSource();
+        Console.WriteLine("Start listening for UDP messages...");
+    
+        try
+        {
+            _udpClient = new UdpClient(_localEndPoint);
+            while (_cts.Token != null && !_cts.Token.IsCancellationRequested)
             {
-                _udpClient = new UdpClient(_localEndPoint);
-                while (!_cts.Token.IsCancellationRequested)
-                {
-                    UdpReceiveResult result = await _udpClient.ReceiveAsync(_cts.Token);
-                    MessageReceived?.Invoke(this, result.Buffer);
-
-                    Console.WriteLine($"Received from {result.RemoteEndPoint}");
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                //empty
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error receiving message: {ex.Message}");
+                UdpReceiveResult result = await _udpClient.ReceiveAsync(_cts.Token);
+                MessageReceived?.Invoke(this, result.Buffer);
+    
+                Console.WriteLine($"Received from {result.RemoteEndPoint}");
             }
         }
+        catch (OperationCanceledException)
+        {
+            // Listener was stopped
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error receiving message: {ex.Message}");
+        }
+        finally
+        {
+            Console.WriteLine("Listener stopped.");
+            _cts?.Dispose();
+            _cts = null;
+        }
+    }
 
         public void StopListening()
         {
@@ -54,12 +65,31 @@ namespace NetSdrClientApp.Networking
             Console.WriteLine("Stopped listening for UDP messages.");
         }
 
-        public void Exit()
+       public void Exit()
+       {
+       try
         {
-            _cts?.Cancel();
-            _udpClient?.Close();
-            Console.WriteLine("Stopped listening for UDP messages.");
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
+            }
+    
+            if (_udpClient != null)
+            {
+                _udpClient.Close();
+                _udpClient = null;
+            }
+    
+            Console.WriteLine("UDP client exited and resources released.");
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error while exiting UDP client: {ex.Message}");
+        }
+    }
+
 
         public override int GetHashCode()
         {
