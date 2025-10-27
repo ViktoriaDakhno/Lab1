@@ -106,9 +106,9 @@ namespace NetSdrClientApp.Networking
                 {
                     Console.WriteLine($"Starting listening for incomming messages.");
 
-                    if (_cts == null)  
-                    throw new InvalidOperationException("CancellationTokenSource is not initialized.");
-                    
+                    if (_cts == null)
+                    throw new InvalidOperationException("CancellationTokenSource not initialized.");
+
                     while (!_cts.Token.IsCancellationRequested)
                     {
                         byte[] buffer = new byte[8194];
