@@ -104,15 +104,17 @@ namespace NetSdrClientApp.Networking
             {
                 try
                 {
-                    Console.WriteLine($"Starting listening for incomming messages.");
-
+                    Console.WriteLine("Starting listening for incoming messages.");
+        
                     if (_cts == null)
-                    throw new InvalidOperationException("CancellationTokenSource not initialized.");
-
+                    {
+                        throw new InvalidOperationException("CancellationTokenSource not initialized.");
+                    }
+        
                     while (!_cts.Token.IsCancellationRequested)
                     {
                         byte[] buffer = new byte[8194];
-
+        
                         int bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length, _cts.Token);
                         if (bytesRead > 0)
                         {
@@ -120,9 +122,9 @@ namespace NetSdrClientApp.Networking
                         }
                     }
                 }
-                catch (OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
-                    //empty
+                    // Просто зупинка, без повідомлення
                 }
                 catch (Exception ex)
                 {
@@ -138,6 +140,7 @@ namespace NetSdrClientApp.Networking
                 throw new InvalidOperationException("Not connected to a server.");
             }
         }
+
     }
 
 }
