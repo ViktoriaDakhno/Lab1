@@ -1,7 +1,4 @@
-using System;
-using System.Threading.Tasks;
-
-namespace NetSdrClientApp.Networking
+﻿namespace NetSdrClientApp.Networking
 {
     public interface IUdpClient
     {
@@ -10,6 +7,5 @@ namespace NetSdrClientApp.Networking
         Task StartListeningAsync();
 
         void StopListening();
-        void Exit();
     }
 }
