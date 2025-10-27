@@ -1,15 +1,10 @@
-using System;
-using System.Threading.Tasks;
-
-namespace NetSdrClientApp.Networking
+﻿
+public interface IUdpClient
 {
-    public interface IUdpClient
-    {
-        event EventHandler<byte[]>? MessageReceived;
+    event EventHandler<byte[]>? MessageReceived;
 
-        Task StartListeningAsync();
+    Task StartListeningAsync();
 
-        void StopListening();
-        void Exit();
-    }
+    void StopListening();
+    void Exit();
 }

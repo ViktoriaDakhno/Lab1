@@ -12,11 +12,11 @@ namespace NetSdrClientApp.Networking
 {
     public class TcpClientWrapper : ITcpClient
     {
-        private readonly string _host;
-        private readonly int _port;
+        private string _host;
+        private int _port;
         private TcpClient? _tcpClient;
         private NetworkStream? _stream;
-        private CancellationTokenSource? _cts;
+        private CancellationTokenSource _cts;
 
         public bool Connected => _tcpClient != null && _tcpClient.Connected && _stream != null;
 
@@ -106,9 +106,6 @@ namespace NetSdrClientApp.Networking
                 {
                     Console.WriteLine($"Starting listening for incomming messages.");
 
-                    if (_cts == null)  
-                    throw new InvalidOperationException("CancellationTokenSource is not initialized.");
-                    
                     while (!_cts.Token.IsCancellationRequested)
                     {
                         byte[] buffer = new byte[8194];
