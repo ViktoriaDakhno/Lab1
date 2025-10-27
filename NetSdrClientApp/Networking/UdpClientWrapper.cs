@@ -31,14 +31,15 @@ namespace NetSdrClientApp.Networking
         _cts = new CancellationTokenSource();
         Console.WriteLine("Start listening for UDP messages...");
     
-        try
+       try
         {
             _udpClient = new UdpClient(_localEndPoint);
-            while (_cts.Token != null && !_cts.Token.IsCancellationRequested)
+        
+            while (_cts != null && !_cts.Token.IsCancellationRequested)
             {
                 UdpReceiveResult result = await _udpClient.ReceiveAsync(_cts.Token);
                 MessageReceived?.Invoke(this, result.Buffer);
-    
+        
                 Console.WriteLine($"Received from {result.RemoteEndPoint}");
             }
         }
@@ -56,7 +57,8 @@ namespace NetSdrClientApp.Networking
             _cts?.Dispose();
             _cts = null;
         }
-    }
+
+        }
 
         public void StopListening()
         {
